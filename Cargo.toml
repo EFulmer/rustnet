@@ -1,0 +1,7 @@
+[package]
+name = "rustnet"
+version = "0.0.1"
+authors = ["Eric Fulmer"]
+edition = "2018"
+description = "Neural network library"
+readme = "README.md"

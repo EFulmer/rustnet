@@ -1,5 +1,6 @@
 mod linear_regression;
 mod utils;
+mod ng;
 
 fn binary_and_nn(x1: f64, x2: f64) -> f64 {
     let theta1 = vec![-30.0, 20.0, 20.0];

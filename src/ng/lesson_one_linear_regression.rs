@@ -1,3 +1,7 @@
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use crate::linear_regression::{mean_squared_error};
+
 /// Create an n-by-n identity matrix.
 ///
 /// # Arguments
@@ -43,5 +47,48 @@ mod tests {
         ];
         let actual = identity_matrix(3);
         assert_eq!(expected, actual);
+    }
+
+    // TODO this code sucks (like the `if let` and excessive unwrapping and collecting),
+    // let's clean it up later.
+    fn load_testing_data() -> Vec<(f64, f64)> {
+        let mut training_examples = Vec::new();
+        // using `unwrap` here because it's test code.
+        let file = File::open("src/ng/ex1data1.txt").unwrap();
+        for line in BufReader::new(file).lines() {
+            if let Ok(line) = line {
+                let split: Vec<&str> = line.split(",").collect();
+                let x = split.get(0).unwrap().parse::<f64>().unwrap();
+                let y = split.get(1).unwrap().parse::<f64>().unwrap();
+                training_examples.push((x, y));
+            }
+        }
+        training_examples
+    }
+
+    // Cost function problem from Ng.
+    #[test]
+    fn test_cost_1() {
+        // TODO switch to a column vector rather than a row vector?
+        // can probably wait until I move to a real linear algebra library.
+        let test_data = load_testing_data();
+
+        let theta = vec![0.0, 0.0];
+        // TODO use `add_bias_term_for_all` once it's written instead of this.
+        let mut x: Vec<Vec<f64>> = test_data
+            .iter()
+            .map(|&(x, y)| vec![1.0, x])
+            .collect();
+        let y: Vec<f64> = test_data
+            .iter()
+            .map(|&(x, y)| y)
+            .collect();
+        let m = x.len() as i32;
+
+        let expected_1 = 32.07;
+        let actual_1 = mean_squared_error(m, &theta, &x, &y);
+
+        // TODO crappy assert_almost_equal, use a real function for it.
+        assert!((actual_1 - expected_1).abs() < 0.1);
     }
 }

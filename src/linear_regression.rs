@@ -14,6 +14,8 @@ pub fn mean_squared_error(m: i32, h_theta: &Vec<f64>, x: &Vec<Vec<f64>>, y: &Vec
     coef * acc
 }
 
+// TODO implement `add_bias_term_for_all` or similar to add the bias term to every observation.
+
 /// Add a bias term to the front of xs.
 pub fn add_bias_term(xs: &mut Vec<f64>) {
     xs.insert(0, 1.0)

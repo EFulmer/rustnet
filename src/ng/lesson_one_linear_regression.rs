@@ -73,7 +73,7 @@ mod tests {
         // can probably wait until I move to a real linear algebra library.
         let test_data = load_testing_data();
 
-        let theta = vec![0.0, 0.0];
+        let theta_1 = vec![0.0, 0.0];
         // TODO use `add_bias_term_for_all` once it's written instead of this.
         let mut x: Vec<Vec<f64>> = test_data
             .iter()
@@ -86,9 +86,16 @@ mod tests {
         let m = x.len() as i32;
 
         let expected_1 = 32.07;
-        let actual_1 = mean_squared_error(m, &theta, &x, &y);
+        let actual_1 = mean_squared_error(m, &theta_1, &x, &y);
 
         // TODO crappy assert_almost_equal, use a real function for it.
         assert!((actual_1 - expected_1).abs() < 0.1);
+
+        let theta_2 = vec![-1.0, 2.0];
+        let expected_2 = 54.24;
+        let actual_2 = mean_squared_error(m, &theta_2, &x, &y);
+
+        // TODO crappy assert_almost_equal, use a real function for it.
+        assert!((actual_2 - expected_2).abs() < 0.01);
     }
 }

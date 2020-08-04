@@ -1,6 +1,7 @@
+use crate::linear_regression::mean_squared_error;
+use crate::utils::dot_product;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use crate::linear_regression::{mean_squared_error};
 
 /// Create an n-by-n identity matrix.
 ///
@@ -23,6 +24,41 @@ pub fn identity_matrix(n: usize) -> Vec<Vec<f64>> {
     mat
 }
 
+// TODO to be fully accurate this would have to save the historical costs.
+pub fn gradient_descent(
+    xs: &Vec<Vec<f64>>,
+    y: &Vec<f64>,
+    theta: &Vec<f64>,
+    alpha: f64,
+    iterations: usize,
+) -> Vec<f64> {
+    assert_eq!(xs.len(), y.len());
+    assert_eq!(xs[0].len(), theta.len());
+    assert!(xs.len() > 0);
+    assert!(theta.len() > 0);
+
+    let m = theta.len();
+    let scale_factor = (alpha / m as f64);
+    let mut found_theta = theta.clone();
+
+    for _ in 1..iterations {
+        let hypothesis: Vec<f64> = xs.iter().map(|x| dot_product(x, &found_theta)).collect();
+        println!("{:?}", hypothesis);
+        let mut delta: Vec<f64> = vec![0.0; m];
+
+        for j in 0..m {
+            for i in 0..xs.len() {
+                delta[j] += (hypothesis[i] - y[i]) * xs[i][j];
+            }
+        }
+
+        for j in 0..m {
+            found_theta[j] -= scale_factor * delta[j];
+        }
+    }
+
+    found_theta
+}
 
 #[cfg(test)]
 mod tests {
@@ -30,10 +66,7 @@ mod tests {
 
     #[test]
     fn test_identity_matrix_2x2() {
-        let expected = vec![
-            vec![1.0, 0.0],
-            vec![0.0, 1.0],
-        ];
+        let expected = vec![vec![1.0, 0.0], vec![0.0, 1.0]];
         let actual = identity_matrix(2);
         assert_eq!(expected, actual);
     }
@@ -75,14 +108,8 @@ mod tests {
 
         let theta_1 = vec![0.0, 0.0];
         // TODO use `add_bias_term_for_all` once it's written instead of this.
-        let mut x: Vec<Vec<f64>> = test_data
-            .iter()
-            .map(|&(x, y)| vec![1.0, x])
-            .collect();
-        let y: Vec<f64> = test_data
-            .iter()
-            .map(|&(x, y)| y)
-            .collect();
+        let x: Vec<Vec<f64>> = test_data.iter().map(|&(x, y)| vec![1.0, x]).collect();
+        let y: Vec<f64> = test_data.iter().map(|&(x, y)| y).collect();
         let m = x.len() as i32;
 
         let expected_1 = 32.07;
@@ -97,5 +124,24 @@ mod tests {
 
         // TODO crappy assert_almost_equal, use a real function for it.
         assert!((actual_2 - expected_2).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_gradient_descent() {
+        // TODO switch to a column vector rather than a row vector?
+        // can probably wait until I move to a real linear algebra library.
+        let test_data = load_testing_data();
+
+        let theta_1 = vec![0.0, 0.0];
+        // TODO use `add_bias_term_for_all` once it's written instead of this.
+        let x: Vec<Vec<f64>> = test_data.iter().map(|&(x, y)| vec![1.0, x]).collect();
+        let y: Vec<f64> = test_data.iter().map(|&(x, y)| y).collect();
+        let m = x.len() as i32;
+
+        let alpha = 0.01;
+        let iterations = 1500;
+        let expected_theta = vec![3.3603, 1.1664];
+        let actual_theta = gradient_descent(&x, &y, &theta_1, alpha, iterations);
+        assert_eq!(expected_theta, actual_theta);
     }
 }

@@ -8,12 +8,7 @@ pub fn sigmoid(xs: Vec<f64>) -> Vec<f64> {
 
 pub fn dot_product(v1: &Vec<f64>, v2: &Vec<f64>) -> f64 {
     assert_eq!(v1.len(), v2.len());
-    let zipped = v1.iter().zip(v2.iter());
-    let mut acc = 0.0;
-    for (x, y) in zipped {
-        acc += x * y;
-    }
-    acc
+    v1.iter().zip(v2.iter()).map(|(v, u)| v * u).sum()
 }
 
 #[cfg(test)]
